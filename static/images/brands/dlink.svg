@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 42">
+    <g transform="translate(6, 8)">
+            <!-- D-Link Connected Ring -->
+            <circle cx="14" cy="13" r="10" stroke="#0072BC" stroke-width="3.5" fill="none"/>
+            <circle cx="14" cy="13" r="4" fill="#0072BC"/>
+        </g>
+        <text x="36" y="27" font-family="'Arial Black', sans-serif" font-size="19" font-weight="900" fill="#0072BC" letter-spacing="0.5">D-Link</text>
+</svg>

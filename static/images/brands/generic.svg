@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 42">
+    <g transform="translate(6, 7)">
+            <!-- 3D Cube / Package for Generic -->
+            <polygon points="14,3 24,8 14,14 4,8" fill="#94A3B8"/>
+            <polygon points="4,8 14,14 14,24 4,18" fill="#64748B"/>
+            <polygon points="24,8 14,14 14,24 24,18" fill="#475569"/>
+        </g>
+        <text x="38" y="26" font-family="'Segoe UI', sans-serif" font-size="17" font-weight="700" fill="#64748B">GENERIC</text>
+</svg>

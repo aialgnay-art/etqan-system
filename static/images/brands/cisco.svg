@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 42">
+    <g transform="translate(6, 6)">
+            <!-- Cisco Bridge Soundwave Bars -->
+            <g stroke="#049FD9" stroke-width="2.8" stroke-linecap="round">
+                <line x1="3" y1="22" x2="3" y2="15"/>
+                <line x1="7" y1="24" x2="7" y2="10"/>
+                <line x1="11" y1="26" x2="11" y2="5"/>
+                <line x1="15" y1="24" x2="15" y2="10"/>
+                <line x1="19" y1="22" x2="19" y2="15"/>
+                <line x1="23" y1="24" x2="23" y2="10"/>
+                <line x1="27" y1="26" x2="27" y2="5"/>
+                <line x1="31" y1="24" x2="31" y2="10"/>
+                <line x1="35" y1="22" x2="35" y2="15"/>
+            </g>
+        </g>
+        <text x="52" y="27" font-family="'Segoe UI', -apple-system, Roboto, sans-serif" font-size="19" font-weight="900" fill="#049FD9" letter-spacing="1">CISCO</text>
+</svg>

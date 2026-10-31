@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 42">
+    <g transform="translate(6, 7)">
+            <circle cx="14" cy="14" r="10" stroke="#003366" stroke-width="3" fill="none"/>
+            <path d="M9 14 H19 M14 9 V19" stroke="#003366" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <text x="38" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="900" fill="#003366">TOTOLINK</text>
+</svg>

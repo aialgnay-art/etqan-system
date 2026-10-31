@@ -1,0 +1,192 @@
+{% extends 'admin/base.html' %}
+{% block title %}المنتجات{% endblock %}
+{% block content %}
+{% set cur_user = session.get('user', {}) %}
+{% set can_edit = (cur_user.get('role') in ('admin', 'developer')) or session.get('admin') %}
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+    <h4 class="mb-0 me-auto">إدارة المنتجات <span class="badge bg-secondary">{{ total }}</span></h4>
+    <a href="{{ url_for('admin.export_csv') }}" class="btn btn-success">📥 تصدير CSV</a>
+    {% if can_edit %}
+    <button type="button" class="btn btn-warning" id="btnAdd">＋ إضافة منتج</button>
+    {% endif %}
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-12 col-md-6"><input type="search" name="q" value="{{ q }}" class="form-control" placeholder="بحث بالاسم أو رقم الصنف"></div>
+    <div class="col-8 col-md-4">
+        <select name="brand" class="form-select">
+            <option value="">كل البراندات</option>
+            {% for b in brands %}<option value="{{ b.brand }}" {% if b.brand == brand %}selected{% endif %}>{{ b.brand }} ({{ b.count }})</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-4 col-md-2"><button class="btn btn-dark w-100">بحث</button></div>
+</form>
+
+<div class="table-responsive bg-white rounded border">
+    <table class="table table-hover align-middle mb-0 text-center">
+        <thead class="table-dark"><tr><th>رقم الصنف</th><th>اسم الصنف</th><th>البراند</th><th>السعر</th><th>العدد</th><th></th></tr></thead>
+        <tbody>
+        {% for p in products %}
+            <tr>
+                <td><strong>{{ p.code }}</strong></td>
+                <td class="text-start">
+                    {{ p.name }}
+                    {% if p.main_cat != 'غير مصنف' %}
+                    <br><small class="text-muted">{{ p.main_cat }} &raquo; {{ p.sub_cat }}</small>
+                    {% endif %}
+                </td>
+                <td>{{ p.brand }}</td>
+                <td>{{ "{:,.2f}".format(p.price) }}</td>
+                <td class="{% if p.quantity < 10 %}text-danger fw-bold{% endif %}">{{ p.quantity }}</td>
+                <td class="text-nowrap">
+                    {% if can_edit %}
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-edit"
+                        data-action="{{ url_for('admin.edit_product', product_id=p.id) }}"
+                        data-code="{{ p.code }}" data-name="{{ p.name }}" data-brand="{{ p.brand }}"
+                        data-main-cat="{{ p.main_cat }}" data-sub-cat="{{ p.sub_cat }}"
+                        data-price="{{ p.price }}" data-quantity="{{ p.quantity }}">تعديل</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-del"
+                        data-action="{{ url_for('admin.delete_product', product_id=p.id) }}"
+                        data-label="{{ p.code }} — {{ p.name }}">حذف</button>
+                    {% else %}
+                    <span class="badge bg-light text-muted border">استعراض فقط</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="text-muted py-4">لا توجد منتجات مطابقة.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if pages > 1 %}
+<nav class="d-flex justify-content-center align-items-center gap-3 mt-3">
+    {% if page > 1 %}<a class="btn btn-sm btn-outline-dark" href="{{ url_for('admin.products', q=q or None, brand=brand or None, page=page - 1) }}">السابق</a>{% endif %}
+    <span class="text-muted">صفحة {{ page }} من {{ pages }}</span>
+    {% if page < pages %}<a class="btn btn-sm btn-outline-dark" href="{{ url_for('admin.products', q=q or None, brand=brand or None, page=page + 1) }}">التالي</a>{% endif %}
+</nav>
+{% endif %}
+
+<!-- تمرير الهيكل الهرمي للجافاسكريبت -->
+<script type="application/json" id="hierarchyData">{{ hierarchy|tojson }}</script>
+
+<!-- نافذة الإضافة/التعديل -->
+<dialog id="productDialog">
+    <form method="post" id="productForm" autocomplete="off">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ list_url }}">
+        <div class="p-3 border-bottom"><h5 class="mb-0" id="dlgTitle"></h5></div>
+        <div class="p-3">
+            <div class="alert alert-danger py-2 d-none" id="dlgErrors"></div>
+            
+            <div class="row g-2 mb-2">
+                <div class="col"><label class="form-label">رقم الصنف</label><input name="code" class="form-control" maxlength="64" required></div>
+                <div class="col"><label class="form-label">البراند</label>
+                    <input name="brand" class="form-control" list="brandList" maxlength="60" placeholder="Generic">
+                    <datalist id="brandList">{% for b in brands %}<option value="{{ b.brand }}">{% endfor %}</datalist>
+                </div>
+            </div>
+            <div class="mb-2"><label class="form-label">اسم الصنف</label><input name="name" class="form-control" maxlength="300" required></div>
+            
+            <div class="row g-2 mb-2">
+                <div class="col"><label class="form-label">المجموعة الرئيسية</label>
+                    <select name="main_cat" id="mainCatSelect" class="form-select">
+                        <option value="غير مصنف">غير مصنف</option>
+                        {% for m in hierarchy.keys() %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col"><label class="form-label">الفئة الفرعية</label>
+                    <select name="sub_cat" id="subCatSelect" class="form-select">
+                        <option value="غير مصنف">غير مصنف</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-2">
+                <div class="col"><label class="form-label">السعر (د.ل)</label><input name="price" class="form-control" inputmode="decimal" required></div>
+                <div class="col"><label class="form-label">العدد</label><input name="quantity" class="form-control" inputmode="numeric" required></div>
+            </div>
+        </div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-close>إلغاء</button>
+            <button class="btn btn-dark">حفظ</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="deleteDialog">
+    <form method="post" id="deleteForm">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ list_url }}">
+        <div class="p-3"><h5>تأكيد الحذف</h5><p class="mb-0 text-break" id="delLabel"></p><p class="text-danger small mt-2 mb-0">لا يمكن التراجع عن الحذف.</p></div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-close>إلغاء</button>
+            <button class="btn btn-danger">حذف نهائياً</button>
+        </div>
+    </form>
+</dialog>
+
+{% if reopen %}<script type="application/json" id="reopenData">{{ reopen|tojson }}</script>{% endif %}
+<script>
+(function () {
+    const dlg = document.getElementById('productDialog'), form = document.getElementById('productForm');
+    const errBox = document.getElementById('dlgErrors');
+    const hierarchy = JSON.parse(document.getElementById('hierarchyData').textContent || '{}');
+    const mainCatSelect = document.getElementById('mainCatSelect');
+    const subCatSelect = document.getElementById('subCatSelect');
+
+    // تحديث الفئات الفرعية عند تغيير المجموعة الرئيسية
+    mainCatSelect.addEventListener('change', function() {
+        const main = this.value;
+        const subs = hierarchy[main] || [];
+        subCatSelect.innerHTML = '<option value="غير مصنف">غير مصنف</option>' + 
+            subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    });
+
+    function openProduct(title, action, v, errors) {
+        form.action = action;
+        document.getElementById('dlgTitle').textContent = title;
+        
+        form.elements.code.value = v.code || '';
+        form.elements.name.value = v.name || '';
+        form.elements.brand.value = v.brand || '';
+        form.elements.price.value = v.price || '0';
+        form.elements.quantity.value = v.quantity || '0';
+
+        // ضبط الأقسام (الرئيسي أولاً ثم الفرعي)
+        const mCat = v.mainCat || v.main_cat || 'غير مصنف';
+        const sCat = v.subCat || v.sub_cat || 'غير مصنف';
+        
+        mainCatSelect.value = mCat;
+        mainCatSelect.dispatchEvent(new Event('change')); // لتوليد الفئات الفرعية فوراً
+        subCatSelect.value = sCat;
+
+        errBox.classList.toggle('d-none', !(errors && errors.length));
+        errBox.replaceChildren(...(errors || []).map(e => Object.assign(document.createElement('div'), { textContent: e })));
+        dlg.showModal();
+        form.elements.code.focus();
+    }
+
+    document.getElementById('btnAdd').addEventListener('click',
+        () => openProduct('إضافة منتج', '{{ url_for("admin.add_product") }}', { price: '0', quantity: '0' }));
+    
+    document.querySelectorAll('.btn-edit').forEach(b => b.addEventListener('click',
+        () => openProduct('تعديل منتج', b.dataset.action, b.dataset)));
+    
+    document.querySelectorAll('.btn-del').forEach(b => b.addEventListener('click', () => {
+        document.getElementById('deleteForm').action = b.dataset.action;
+        document.getElementById('delLabel').textContent = b.dataset.label;
+        document.getElementById('deleteDialog').showModal();
+    }));
+    
+    document.querySelectorAll('dialog').forEach(d => {
+        d.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => d.close()));
+        d.addEventListener('click', e => { if (e.target === d) d.close(); });
+    });
+
+    const re = document.getElementById('reopenData');
+    if (re) { const r = JSON.parse(re.textContent); openProduct(r.title, r.action, r.values, r.errors); }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends 'admin/base.html' %}
+{% block title %}إدارة المستخدمين والصلاحيات{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+    <div class="me-auto">
+        <h4 class="mb-1 text-dark fw-bold">👥 إدارة المستخدمين وصلاحيات الفريق</h4>
+        <p class="text-muted small mb-0">تحديد أدوار الوصول السحابي بين المدير، المطور، وزملاء العمل</p>
+    </div>
+    <button type="button" class="btn btn-primary" id="btnAddUser" style="background-color: #102A43; border-color: #102A43;">
+        ＋ إضافة مستخدم جديد
+    </button>
+</div>
+
+<!-- كروت توضيح الرتب والصلاحيات -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-danger">
+            <div class="card-body p-3">
+                <span class="badge bg-danger px-2 py-1 mb-2">admin (المدير)</span>
+                <p class="small text-muted mb-0">تحكم كامل ومطلق: إضافة وتعديل وحذف المنتجات، رفع وحذف الشعارات، تصدير البيانات، وإدارة الحسابات.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-info">
+            <div class="card-body p-3">
+                <span class="badge bg-info text-dark px-2 py-1 mb-2">developer (المطور)</span>
+                <p class="small text-muted mb-0">صلاحيات الإدارة الفنية كاملة + إدارة البنية التحتية، السجلات التشغيلية، ومتابعة مزامنة قاعدة البيانات.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+            <div class="card-body p-3">
+                <span class="badge bg-success px-2 py-1 mb-2">staff (الزميل / الموظف)</span>
+                <p class="small text-muted mb-0">استعراض المخزون والبحث الفوري والتصفية ومعاينة الأصناف والكميات والأسعار، ومحمي برمجياً من التعديل أو الحذف.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- جدول المستخدمين -->
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-center">
+            <thead class="table-dark" style="background-color: #102A43;">
+                <tr>
+                    <th style="width: 25%;" class="text-start">اسم المستخدم / الاسم</th>
+                    <th style="width: 20%;">الرتبة</th>
+                    <th style="width: 25%;">تاريخ الإنشاء</th>
+                    <th style="width: 30%;">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for u in users %}
+                <tr>
+                    <td class="text-start">
+                        <strong class="fs-6 text-dark">{{ u.name or u.username }}</strong>
+                        <br><span class="text-muted small">المعرّف: <code>{{ u.username }}</code></span>
+                    </td>
+                    <td>
+                        {% if u.role == 'admin' %}
+                        <span class="badge bg-danger px-3 py-1 fs-6">المدير (admin)</span>
+                        {% elif u.role == 'developer' %}
+                        <span class="badge bg-info text-dark px-3 py-1 fs-6">المطور (dev)</span>
+                        {% else %}
+                        <span class="badge bg-success px-3 py-1 fs-6">موظف (staff)</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">
+                        {{ u.created_at or 'افتراضي' }}
+                    </td>
+                    <td>
+                        <div class="d-inline-flex gap-1">
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-secondary btn-pwd"
+                                    data-username="{{ u.username }}"
+                                    data-action="{{ url_for('admin.change_user_password', username=u.username) }}">
+                                🔑 تغيير كلمة المرور
+                            </button>
+                            {% if current_user and current_user.username != u.username %}
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger btn-del-user"
+                                    data-username="{{ u.username }}"
+                                    data-action="{{ url_for('admin.delete_user', username=u.username) }}">
+                                🗑️ حذف
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4" class="text-muted py-4">لم يتم إنشاء مستخدمين في الجدول بعد (يتم استخدام حساب admin المباشر).</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- نافذة إضافة مستخدم جديد -->
+<dialog id="addUserDialog">
+    <form method="post" action="{{ url_for('admin.add_user') }}" autocomplete="off">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="background: #102A43; color: white;">
+            <h5 class="mb-0 fw-bold">＋ إضافة مستخدم جديد للمنظومة</h5>
+            <button type="button" class="btn-close btn-close-white" data-close aria-label="إغلاق"></button>
+        </div>
+        <div class="p-4">
+            <div class="mb-3">
+                <label class="form-label fw-bold">اسم المستخدم (Username):</label>
+                <input name="username" class="form-control" required placeholder="مثال: saleh أو aletqan_staff" pattern="[a-zA-Z0-9_\-]+" title="أحرف وأرقام إنجليزية فقط">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">الاسم الظاهر (Display Name):</label>
+                <input name="name" class="form-control" required placeholder="مثال: صالح (المدير)">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">الرتبة والدور (Role):</label>
+                <select name="role" class="form-select" required>
+                    <option value="staff" selected>staff - زميل عمل / موظف (استعراض وبحث فقط)</option>
+                    <option value="admin">admin - مدير (صلاحيات كاملة للمنتجات والشعارات)</option>
+                    <option value="developer">developer - مطور (إدارة فنية متقدمة)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">كلمة المرور:</label>
+                <input type="password" name="password" class="form-control" minlength="6" required placeholder="6 أحرف على الأقل">
+            </div>
+        </div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-close>إلغاء</button>
+            <button type="submit" class="btn btn-primary" style="background-color: #102A43; border-color: #102A43;">حفظ وإنشاء الحساب</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- نافذة تغيير كلمة المرور -->
+<dialog id="changePwdDialog">
+    <form method="post" id="changePwdForm" autocomplete="off">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="background: #102A43; color: white;">
+            <h5 class="mb-0 fw-bold">🔑 تغيير كلمة مرور: <span id="pwdTargetUser" class="text-info"></span></h5>
+            <button type="button" class="btn-close btn-close-white" data-close aria-label="إغلاق"></button>
+        </div>
+        <div class="p-4">
+            <div class="mb-3">
+                <label class="form-label fw-bold">كلمة المرور الجديدة:</label>
+                <input type="password" name="password" class="form-control" minlength="6" required placeholder="أدخل كلمة المرور الجديدة">
+            </div>
+        </div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-close>إلغاء</button>
+            <button type="submit" class="btn btn-primary" style="background-color: #102A43; border-color: #102A43;">تحديث كلمة المرور</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- نافذة تأكيد حذف المستخدم -->
+<dialog id="deleteUserDialog">
+    <form method="post" id="deleteUserForm">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="p-3 border-bottom bg-danger text-white d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 fw-bold">تأكيد حذف المستخدم</h5>
+            <button type="button" class="btn-close btn-close-white" data-close aria-label="إغلاق"></button>
+        </div>
+        <div class="p-4">
+            <p class="mb-0">هل أنت متأكد من رغبتك في حذف حساب المستخدم: <strong id="delTargetUser" class="text-danger"></strong>؟</p>
+        </div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-close>إلغاء</button>
+            <button type="submit" class="btn btn-danger">نعم، حذف الحساب</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+(function() {
+    const addDlg = document.getElementById('addUserDialog');
+    const pwdDlg = document.getElementById('changePwdDialog');
+    const pwdForm = document.getElementById('changePwdForm');
+    const delDlg = document.getElementById('deleteUserDialog');
+    const delForm = document.getElementById('deleteUserForm');
+
+    document.getElementById('btnAddUser').addEventListener('click', () => addDlg.showModal());
+
+    document.querySelectorAll('.btn-pwd').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const username = btn.dataset.username;
+            pwdForm.action = btn.dataset.action;
+            document.getElementById('pwdTargetUser').textContent = username;
+            pwdDlg.showModal();
+        });
+    });
+
+    document.querySelectorAll('.btn-del-user').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const username = btn.dataset.username;
+            delForm.action = btn.dataset.action;
+            document.getElementById('delTargetUser').textContent = username;
+            delDlg.showModal();
+        });
+    });
+
+    document.querySelectorAll('dialog').forEach(d => {
+        d.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => d.close()));
+        d.addEventListener('click', e => { if (e.target === d) d.close(); });
+    });
+})();
+</script>
+{% endblock %}
+

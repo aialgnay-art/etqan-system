@@ -1,0 +1,35 @@
+{% extends 'admin/base.html' %}
+{% block title %}تسجيل الدخول{% endblock %}
+{% block content %}
+<div class="mx-auto" style="max-width: 400px; margin-top: 30px;">
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="p-4 text-center text-white" style="background: #102A43;">
+            <h4 class="fw-bold mb-1">منظومة الإتقان</h4>
+            <p class="small text-info mb-0">بوابة تسجيل الدخول المركزية</p>
+        </div>
+        <div class="card-body p-4 bg-white">
+            {% if not configured %}
+            <div class="alert alert-warning mb-0">
+                لم تُحدَّد كلمة مرور بعد. شغّل في الطرفية:
+                <code dir="ltr" class="d-block mt-2">python setup_db.py --set-password</code>
+            </div>
+            {% else %}
+            <form method="post" autocomplete="on">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark" for="username">اسم المستخدم</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="admin أو اسم حسابك" autofocus>
+                    <div class="form-text small text-muted">اتركه فارغاً للدخول بحساب المدير الافتراضي (admin).</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark" for="password">كلمة المرور</label>
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="أدخل كلمة المرور">
+                </div>
+                <button class="btn btn-primary w-100 py-2 fw-bold" style="background-color: #102A43; border-color: #102A43;">دخول للمنظومة</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

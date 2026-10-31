@@ -1,0 +1,229 @@
+{% extends 'admin/base.html' %}
+{% block title %}إدارة شعارات البراندات{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+    <div class="me-auto">
+        <h4 class="mb-1 text-dark fw-bold">🏷️ إدارة شعارات العلامات التجارية</h4>
+        <p class="text-muted small mb-0">يمكنك رفع، تغيير، أو حذف الشعار الرسمي لأي شركة مسجلة بالمنظومة</p>
+    </div>
+    {% set with_logo = brands|selectattr('has_logo')|list|length %}
+    <div class="d-flex gap-2">
+        <span class="badge bg-primary px-3 py-2 fs-6">إجمالي: {{ brands|length }}</span>
+        <span class="badge bg-success px-3 py-2 fs-6">بشعار: {{ with_logo }}</span>
+        <span class="badge bg-secondary px-3 py-2 fs-6">بالشارة البديلة: {{ brands|length - with_logo }}</span>
+    </div>
+</div>
+
+<!-- صندوق البحث السريع لتصفية البراندات -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <input type="text" id="brandSearchInput" class="form-control" placeholder="🔍 ابحث عن اسم العلامة التجارية هنا...">
+            </div>
+            <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                <span class="text-muted small">الصيغ المدعومة للشعارات: <strong>SVG (موصى به), PNG شفاف, JPG, WEBP</strong></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-center" id="brandsTable">
+            <thead class="table-dark" style="background-color: #102A43;">
+                <tr>
+                    <th style="width: 18%;">الشعار الحالي</th>
+                    <th style="width: 28%;" class="text-start">العلامة التجارية</th>
+                    <th style="width: 16%;">عدد المنتجات</th>
+                    <th style="width: 18%;">حالة الشعار</th>
+                    <th style="width: 20%;">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for b in brands %}
+                <tr class="brand-row" data-name="{{ b.name|lower }}">
+                    <td>
+                        <div class="d-inline-flex align-items-center justify-content-center p-2 rounded bg-white shadow-sm border" style="min-width: 120px; height: 50px;">
+                            {% if b.has_logo %}
+                            <img src="/brand-logo/{{ b.slug }}?v={{ b.logo_file }}" 
+                                 alt="{{ b.name }}" 
+                                 style="max-height: 38px; max-width: 110px; object-fit: contain;">
+                            {% else %}
+                            <span class="badge bg-light text-primary border fw-bold px-3 py-1" style="font-size: 0.82rem;">
+                                {{ b.name[:2]|upper }} · شارة بديلة
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-start">
+                        <strong class="fs-6 text-dark">{{ b.name }}</strong>
+                        <br><span class="text-muted small">معرّف النظام: <code>{{ b.slug }}</code></span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-primary border px-2 py-1 fw-bold fs-6">
+                            {{ b.count }} صنف
+                        </span>
+                    </td>
+                    <td>
+                        {% if b.has_logo %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            ✓ متوفر ({{ b.logo_file.split('.')[-1]|upper }})
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                            شارة نصية بديلة
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-inline-flex gap-1">
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-primary btn-upload"
+                                    data-name="{{ b.name }}"
+                                    data-slug="{{ b.slug }}"
+                                    data-action="{{ url_for('admin.upload_brand_logo', slug=b.slug) }}">
+                                📷 {% if b.has_logo %}تغيير{% else %}رفع شعار{% endif %}
+                            </button>
+                            {% if b.has_logo %}
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger btn-delete"
+                                    data-name="{{ b.name }}"
+                                    data-slug="{{ b.slug }}"
+                                    data-action="{{ url_for('admin.delete_brand_logo', slug=b.slug) }}">
+                                🗑️ حذف
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- نافذة رفع / تغيير الشعار -->
+<dialog id="uploadDialog">
+    <form method="post" id="uploadForm" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="brand_name" id="uploadBrandName">
+        <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="background: #102A43; color: white;">
+            <h5 class="mb-0 fw-bold">📷 رفع شعار: <span id="dlgBrandTitle" class="text-info"></span></h5>
+            <button type="button" class="btn-close btn-close-white" data-close aria-label="إغلاق"></button>
+        </div>
+        <div class="p-4">
+            <div class="mb-3">
+                <label class="form-label fw-bold">اختر ملف الشعار من جهازك:</label>
+                <input type="file" name="logo" id="logoFileInput" class="form-control" accept=".svg,.png,.jpg,.jpeg,.webp" required>
+                <div class="form-text small text-muted mt-2">
+                    💡 يفضل استخدام ملفات <strong>SVG</strong> أو <strong>PNG بخلفية شفافة</strong> لضمان أعلى جودة في الواجهة. الحد الأقصى للحجم 4MB.
+                </div>
+            </div>
+            
+            <!-- معاينة فورية للصورة المختارة -->
+            <div class="mt-3 p-3 bg-light rounded text-center d-none" id="previewContainer">
+                <span class="small text-muted d-block mb-2">معاينة الشعار المختار:</span>
+                <img id="filePreview" src="" alt="Preview" style="max-height: 48px; max-width: 140px; object-fit: contain;">
+            </div>
+        </div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-close>إلغاء</button>
+            <button type="submit" class="btn btn-primary" style="background-color: #102A43; border-color: #102A43;">حفظ وتطبيق الشعار</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- نافذة تأكيد حذف الشعار -->
+<dialog id="deleteLogoDialog">
+    <form method="post" id="deleteLogoForm">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="brand_name" id="delBrandName">
+        <div class="p-3 border-bottom bg-danger text-white d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 fw-bold">تأكيد حذف الشعار</h5>
+            <button type="button" class="btn-close btn-close-white" data-close aria-label="إغلاق"></button>
+        </div>
+        <div class="p-4">
+            <p class="mb-2">هل أنت متأكد من رغبتك في حذف شعار الشركة: <strong id="delBrandTitle" class="text-danger"></strong>؟</p>
+            <p class="small text-muted mb-0">عند الحذف، ستتحول المنظومة تلقائياً إلى عرض الشارة النصية البديلة الأنيقة ولن تتأثر بيانات المنتجات إطلاقاً.</p>
+        </div>
+        <div class="p-3 border-top d-flex gap-2 justify-content-end bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-close>إلغاء</button>
+            <button type="submit" class="btn btn-danger">نعم، حذف الشعار</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+(function() {
+    const uploadDlg = document.getElementById('uploadDialog');
+    const uploadForm = document.getElementById('uploadForm');
+    const deleteDlg = document.getElementById('deleteLogoDialog');
+    const deleteForm = document.getElementById('deleteLogoForm');
+    const fileInput = document.getElementById('logoFileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const filePreview = document.getElementById('filePreview');
+
+    // فتح نافذة الرفع
+    document.querySelectorAll('.btn-upload').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.dataset.name;
+            const action = btn.dataset.action;
+            uploadForm.action = action;
+            document.getElementById('uploadBrandName').value = name;
+            document.getElementById('dlgBrandTitle').textContent = name;
+            fileInput.value = '';
+            previewContainer.classList.add('d-none');
+            uploadDlg.showModal();
+        });
+    });
+
+    // معاينة الصورة المختارة فورياً
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                filePreview.src = e.target.result;
+                previewContainer.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.classList.add('d-none');
+        }
+    });
+
+    // فتح نافذة الحذف
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.dataset.name;
+            const action = btn.dataset.action;
+            deleteForm.action = action;
+            document.getElementById('delBrandName').value = name;
+            document.getElementById('delBrandTitle').textContent = name;
+            deleteDlg.showModal();
+        });
+    });
+
+    // إغلاق النوافذ المنبثقة
+    document.querySelectorAll('dialog').forEach(d => {
+        d.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => d.close()));
+        d.addEventListener('click', e => { if (e.target === d) d.close(); });
+    });
+
+    // تصفية حية لجدول البراندات
+    const searchInput = document.getElementById('brandSearchInput');
+    const rows = document.querySelectorAll('.brand-row');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const q = this.value.trim().toLowerCase();
+            rows.forEach(r => {
+                const name = r.dataset.name || '';
+                r.style.display = name.includes(q) ? '' : 'none';
+            });
+        });
+    }
+})();
+</script>
+{% endblock %}
+

@@ -1,0 +1,556 @@
+/**
+ * منظومة الإتقان لإدارة المخزون - الهوية البصرية الحديثة
+ * Palette:
+ * - Primary (الرئيسي): #102A43 (Navy)
+ * - Accent (التفاعل والتركيز): #38BDF8 (Sky Blue)
+ * - Main Background (خلفية بيضاء): #FFFFFF
+ * - Secondary Background (خلفية مساعدة): #F1F5F9 (Slate 100)
+ * - Text (النصوص): #334155 (Slate 700)
+ */
+
+:root {
+    --etqan-primary: #102A43;
+    --etqan-primary-dark: #0B1D30;
+    --etqan-primary-light: #1A365D;
+    --etqan-accent: #38BDF8;
+    --etqan-accent-hover: #0284C7;
+    --etqan-accent-subtle: rgba(56, 189, 248, 0.12);
+    --etqan-bg: #FFFFFF;
+    --etqan-bg-subtle: #F1F5F9;
+    --etqan-bg-muted: #E2E8F0;
+    --etqan-text: #334155;
+    --etqan-text-dark: #0F172A;
+    --etqan-text-muted: #64748B;
+    --etqan-border: #CBD5E1;
+    --etqan-border-light: #E2E8F0;
+    --etqan-success: #059669;
+    --etqan-danger: #DC2626;
+
+    /* إسناد متغيرات Bootstrap لتتناغم مع الهوية البصرية */
+    --bs-body-bg: var(--etqan-bg-subtle);
+    --bs-body-color: var(--etqan-text);
+    --bs-primary: var(--etqan-primary);
+    --bs-link-color: var(--etqan-accent-hover);
+}
+
+/* =========================================
+   1. الإعدادات العامة والخطوط
+   ========================================= */
+body {
+    background-color: var(--etqan-bg-subtle);
+    color: var(--etqan-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+}
+
+/* =========================================
+   2. قسم الهوية الترويسية (Hero Header)
+   ========================================= */
+.hero-section {
+    background: linear-gradient(135deg, var(--etqan-primary-dark) 0%, var(--etqan-primary) 65%, #1B3A5A 100%);
+    color: #FFFFFF;
+    padding: 38px 20px 32px;
+    text-align: center;
+    border-bottom: 4px solid var(--etqan-accent);
+    box-shadow: 0 4px 20px rgba(11, 29, 48, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--etqan-accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.hero-section h1 {
+    color: #FFFFFF;
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin: 12px 0 6px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hero-section h4 {
+    color: var(--etqan-accent);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+.hero-section p {
+    color: #94A3B8;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* =========================================
+   3. أزرار الأقسام الرئيسية والفرعية
+   ========================================= */
+.main-cat-btn {
+    background-color: var(--etqan-bg);
+    color: var(--etqan-text);
+    border: 1px solid var(--etqan-border);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.main-cat-btn:hover {
+    border-color: var(--etqan-accent);
+    color: var(--etqan-primary);
+    background-color: var(--etqan-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 42, 67, 0.08);
+}
+
+/* الحالة النشطة للقسم الرئيسي (يستخدمها search.js) */
+.main-cat-btn.btn-dark {
+    background-color: var(--etqan-primary) !important;
+    border-color: var(--etqan-accent) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(16, 42, 67, 0.28), 0 0 0 1px var(--etqan-accent);
+}
+
+.category-card {
+    background: var(--etqan-bg);
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--etqan-border-light);
+    user-select: none;
+    font-size: 0.8rem;
+    color: var(--etqan-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.category-card:hover {
+    background: var(--etqan-bg-subtle);
+    border-color: var(--etqan-accent);
+    color: var(--etqan-primary);
+    transform: translateY(-1px);
+}
+
+.active-category {
+    background-color: var(--etqan-primary) !important;
+    color: #FFFFFF !important;
+    border-color: var(--etqan-accent) !important;
+    box-shadow: 0 3px 10px rgba(16, 42, 67, 0.2);
+}
+
+/* =========================================
+   4. بطاقات وشعارات العلامات التجارية (Brands)
+   ========================================= */
+.brand-box {
+    background: var(--etqan-bg);
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid var(--etqan-border-light);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 76px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-box:hover {
+    border-color: var(--etqan-accent);
+    background-color: #FFFFFF;
+    box-shadow: 0 6px 14px rgba(56, 189, 248, 0.16);
+    transform: translateY(-2px);
+}
+
+/* العلامة النشطة (يستخدمها search.js) */
+.active-brand {
+    background-color: var(--etqan-primary) !important;
+    border-color: var(--etqan-accent) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(16, 42, 67, 0.3), 0 0 0 2px var(--etqan-accent) !important;
+}
+
+.active-brand .brand-logo-img {
+    filter: brightness(0) invert(1);
+}
+
+.active-brand .brand-fallback-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+    border-color: var(--etqan-accent);
+}
+
+.active-brand .brand-name-caption {
+    color: var(--etqan-accent) !important;
+}
+
+.active-brand .brand-count-pill {
+    background: rgba(56, 189, 248, 0.25);
+    color: #FFFFFF;
+}
+
+/* حاوية الشعار */
+.brand-logo-wrap {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.brand-logo-img {
+    max-height: 32px;
+    max-width: 95%;
+    object-fit: contain;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+/* الشارة البديلة الأنيقة (Fallback) عند غياب الشعار */
+.brand-fallback-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--etqan-bg-subtle);
+    border: 1px solid var(--etqan-border);
+    color: var(--etqan-primary);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brand-name-caption {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--etqan-text-muted);
+    line-height: 1.2;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.brand-count-pill {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: var(--etqan-bg-subtle);
+    color: var(--etqan-text-muted);
+    padding: 1px 5px;
+    border-radius: 10px;
+    border: 1px solid var(--etqan-border-light);
+}
+
+#toggleBrands {
+    border-color: var(--etqan-border);
+    color: var(--etqan-primary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 6px 18px;
+    border-radius: 20px;
+    background: var(--etqan-bg);
+    transition: all 0.2s ease;
+}
+
+#toggleBrands:hover {
+    background: var(--etqan-primary);
+    color: #FFFFFF;
+    border-color: var(--etqan-primary);
+}
+
+/* =========================================
+   5. حاوية البحث الذكي
+   ========================================= */
+.search-container {
+    background: var(--etqan-bg);
+    padding: 22px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px -2px rgba(16, 42, 67, 0.06);
+    margin-bottom: 24px;
+    border: 1px solid var(--etqan-border-light);
+}
+
+.search-type-label {
+    color: var(--etqan-primary);
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--etqan-primary);
+    border-color: var(--etqan-primary);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem var(--etqan-accent-subtle);
+    border-color: var(--etqan-accent);
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-control-lg {
+    font-size: 0.95rem;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1.5px solid var(--etqan-border);
+    color: var(--etqan-text-dark);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem var(--etqan-accent-subtle) !important;
+    border-color: var(--etqan-accent) !important;
+}
+
+.clear-btn {
+    position: absolute;
+    left: 15px;
+    cursor: pointer;
+    color: #94A3B8;
+    font-size: 1.4rem;
+    display: none;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.clear-btn:hover {
+    color: var(--etqan-danger);
+}
+
+/* تظليل النصوص المطابقة */
+.highlight {
+    background-color: #FEF08A !important;
+    color: #854D0E !important;
+    font-weight: 800;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+#resultCount {
+    color: var(--etqan-text-muted);
+    font-weight: 600;
+}
+
+/* =========================================
+   6. جدول عرض المنتجات
+   ========================================= */
+.table-container {
+    background: var(--etqan-bg);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px -2px rgba(16, 42, 67, 0.06);
+    overflow-x: auto;
+    border: 1px solid var(--etqan-border-light);
+}
+
+.table {
+    margin-bottom: 0;
+    color: var(--etqan-text);
+}
+
+.table > :not(caption) > * > * {
+    padding: 12px 14px;
+    border-bottom-color: var(--etqan-border-light);
+}
+
+thead.table-dark th {
+    background-color: var(--etqan-primary) !important;
+    color: #FFFFFF !important;
+    font-weight: 800;
+    font-size: 0.86rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--etqan-accent);
+    white-space: nowrap;
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: #F8FAFC;
+}
+
+/* خلية كود الصنف */
+.product-code-cell {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+    color: var(--etqan-primary);
+}
+
+.product-code-badge {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--etqan-primary);
+    background: var(--etqan-bg-subtle);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--etqan-border-light);
+}
+
+/* اسم الصنف */
+.product-name-cell {
+    color: var(--etqan-text-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* خلية العلامة التجارية داخل الجدول */
+.table-brand-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 6px;
+    background: transparent;
+    border: none;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-brand-cell:hover {
+    transform: scale(1.08);
+}
+
+.table-brand-logo {
+    height: 32px;
+    max-height: 36px;
+    max-width: 120px;
+    width: auto;
+    object-fit: contain;
+    vertical-align: middle;
+    filter: drop-shadow(0 1px 3px rgba(16, 42, 67, 0.1));
+}
+
+.table-brand-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--etqan-primary) 0%, var(--etqan-primary-light) 100%);
+    border: 1px solid var(--etqan-accent);
+    color: #FFFFFF;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(16, 42, 67, 0.15);
+}
+
+/* السعر والكمية */
+.price-tag {
+    color: var(--etqan-success);
+    font-weight: 800;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.qty-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    background: var(--etqan-bg-subtle);
+    color: var(--etqan-text);
+}
+
+.qty-badge.low-stock {
+    background: #FEE2E2;
+    color: var(--etqan-danger);
+    border: 1px solid #FECACA;
+}
+
+/* صف فاصل النتائج التقريبية */
+.separator-row td {
+    background-color: var(--etqan-bg-subtle) !important;
+    color: var(--etqan-text);
+    font-weight: 700;
+    font-size: 0.88rem;
+    padding: 12px;
+    border-top: 2px dashed var(--etqan-accent) !important;
+    border-bottom: 2px dashed var(--etqan-accent) !important;
+}
+
+.hidden-row {
+    display: none !important;
+}
+
+/* =========================================
+   7. التجاوب مع شاشات الهواتف (Responsive)
+   ========================================= */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 26px 14px 22px;
+    }
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+    .hero-section h4 {
+        font-size: 0.9rem;
+    }
+    .search-container {
+        padding: 16px;
+    }
+    .brand-box {
+        min-height: 68px;
+        padding: 8px 4px;
+    }
+    .brand-logo-img {
+        max-height: 24px;
+    }
+    .table-container {
+        padding: 8px;
+    }
+    .table > :not(caption) > * > * {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+}

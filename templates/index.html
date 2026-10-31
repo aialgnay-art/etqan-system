@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALETQAN - منظومة الإتقان لإدارة المخزون</title>
+    <!-- مكتبة Bootstrap 5 -->
+    <link href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}" rel="stylesheet"
+          onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'">
+    <!-- الهوية البصرية الحديثة لمنظومة الإتقان -->
+    <link href="{{ url_for('static', filename='css/theme.css') }}" rel="stylesheet">
+</head>
+<body>
+
+    <!-- قسم الهوية الترويسية الفاخرة (Hero Section) -->
+    <div class="hero-section mb-4">
+        <div class="hero-badge">ALETQAN INVENTORY SYSTEM</div>
+        <h1>ALETQAN</h1>
+        <h4>OPTICAL FIBER &amp; COPPER CABLES</h4>
+        <p class="mt-2">منظومة الإتقان لإدارة المخزون والحلول المتكاملة لشبكات الألياف البصرية والكوابل النحاسية</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- الأقسام الرئيسية -->
+        <div class="row g-2 mb-3 justify-content-center">
+            {% for main_cat, sub_cats in hierarchy.items() %}
+            <div class="col-auto">
+                <button class="btn btn-outline-secondary fw-bold main-cat-btn" data-main-cat="{{ main_cat }}">{{ main_cat }}</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- الأقسام الفرعية -->
+        <div class="row g-2 mb-4 justify-content-center d-none" id="subCatContainer">
+            {% for main_cat, sub_cats in hierarchy.items() %}
+                {% for sub in sub_cats %}
+                <div class="col-6 col-md-3 col-lg-2 sub-cat-wrapper d-none" data-parent="{{ main_cat }}">
+                    <div class="category-card sub-category-card" data-main-cat="{{ main_cat }}" data-sub-cat="{{ sub }}">{{ sub }}</div>
+                </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <!-- شبكة شعارات العلامات التجارية (Brand Logos Grid) -->
+        <div class="row g-2 mb-2 justify-content-center">
+            {% for b in brands_main %}
+            {% set b_slug = b.brand|lower|replace(' ', '')|replace("'", "")|replace('-', '') %}
+            <div class="col-4 col-md-3 col-lg-2">
+                <div class="brand-box" data-brand="{{ b.brand|upper }}" title="{{ b.brand }} ({{ b.count }} منتج)">
+                    <span class="brand-count-pill">{{ b.count }}</span>
+                    <div class="brand-logo-wrap">
+                        <img src="/brand-logo/{{ b_slug }}"
+                             alt="{{ b.brand }}"
+                             class="brand-logo-img"
+                             loading="lazy"
+                             onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                        <div class="brand-fallback-badge d-none">{{ b.brand }}</div>
+                    </div>
+                    <div class="brand-name-caption">{{ b.brand }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if brands_more %}
+        <div class="row g-2 mb-2 justify-content-center d-none" id="moreBrands">
+            {% for b in brands_more %}
+            {% set b_slug = b.brand|lower|replace(' ', '')|replace("'", "")|replace('-', '') %}
+            <div class="col-4 col-md-3 col-lg-2">
+                <div class="brand-box" data-brand="{{ b.brand|upper }}" title="{{ b.brand }} ({{ b.count }} منتج)">
+                    <span class="brand-count-pill">{{ b.count }}</span>
+                    <div class="brand-logo-wrap">
+                        <img src="/brand-logo/{{ b_slug }}"
+                             alt="{{ b.brand }}"
+                             class="brand-logo-img"
+                             loading="lazy"
+                             onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                        <div class="brand-fallback-badge d-none">{{ b.brand }}</div>
+                    </div>
+                    <div class="brand-name-caption">{{ b.brand }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mb-4">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleBrands" data-label="عرض كل البراندات ({{ brands_more|length }})">عرض كل البراندات ({{ brands_more|length }})</button>
+        </div>
+        {% else %}
+        <div class="mb-4"></div>
+        {% endif %}
+
+        <!-- صندوق البحث الذكي -->
+        <div class="search-container">
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-3 mb-md-0 text-center text-md-start">
+                    <strong class="me-3 search-type-label">طريقة البحث:</strong>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchName" value="name" checked>
+                        <label class="form-check-label fw-bold" for="searchName">اسم الصنف</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchCode" value="code">
+                        <label class="form-check-label fw-bold" for="searchCode">رقم الصنف</label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="search-wrapper">
+                        <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="🔍 اكتب للبحث هنا... (يدعم العربي: سلك نحاس 3 ميترو شركة اكوس)" autocomplete="off">
+                        <button type="button" id="clearSearchBtn" class="clear-btn" aria-label="مسح البحث">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                <div class="small" id="resultCount"></div>
+                <div class="small text-danger d-none" id="smartError">تعذّر الاتصال بالبحث الذكي. جرّب الكتابة بالإنجليزية.</div>
+            </div>
+        </div>
+
+        <!-- جدول المنتجات المطور مع دمج الشعارات -->
+        <div class="table-container mb-5">
+            <table class="table table-hover table-striped text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 14%;">رقم الصنف</th>
+                        <th style="width: 44%;" class="text-start">اسم الصنف</th>
+                        <th style="width: 18%;">العلامة التجارية</th>
+                        <th style="width: 12%;">السعر (د.ل)</th>
+                        <th style="width: 12%;">العدد</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    {% for product in products %}
+                    {% set p_slug = product.brand|lower|replace(' ', '')|replace("'", "")|replace('-', '') %}
+                    <tr data-id="{{ product.id }}" data-name="{{ product.name|lower }}" data-code="{{ product.code|lower }}" data-brand="{{ product.brand|upper }}" data-main-cat="{{ product.main_cat }}" data-sub-cat="{{ product.sub_cat }}">
+                        <td class="product-code-cell"><strong>{{ product.code }}</strong></td>
+                        <td class="text-start product-name-cell">{{ product.name }}</td>
+                        <td>
+                            <div class="table-brand-cell" title="{{ product.brand }}">
+                                <img src="/brand-logo/{{ p_slug }}"
+                                     alt="{{ product.brand }}"
+                                     class="table-brand-logo"
+                                     loading="lazy"
+                                     onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                                <span class="table-brand-fallback d-none">{{ product.brand }}</span>
+                            </div>
+                        </td>
+                        <td class="price-tag">{{ "{:,.2f}".format(product.price) }}</td>
+                        <td>
+                            <span class="qty-badge {% if product.quantity < 10 %}low-stock{% endif %}">
+                                {{ product.quantity }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="text-center text-muted py-4 d-none" id="emptyState">لا توجد نتائج مطابقة.</div>
+        </div>
+    </div>
+
+    <!-- منطق البحث الفوري والفلترة دون أي مساس -->
+    <script src="{{ url_for('static', filename='search.js') }}"></script>
+    <script>document.addEventListener('DOMContentLoaded', EtqanSearch.init);</script>
+</body>
+</html>

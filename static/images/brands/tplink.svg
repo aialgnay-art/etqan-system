@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 42">
+    <g transform="translate(8, 7)">
+            <!-- TP-Link Modern Interlocking Loop -->
+            <path d="M6 14 C6 8, 14 6, 20 10" stroke="#4ACBD6" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M22 14 C22 20, 14 22, 8 18" stroke="#4ACBD6" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+        <text x="42" y="26" font-family="'Segoe UI', sans-serif" font-size="18" font-weight="800" fill="#4ACBD6">tp-link</text>
+</svg>
